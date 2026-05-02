@@ -272,7 +272,7 @@ Several function parameters (e.g., `_dealId`, `_payee`, `_amount`) use an unders
 ### Prerequisites
 
 - [Foundry](https://getfoundry.sh/)
-- Solidity `^0.8.13`
+- Solidity `^0.8.20`
 - OpenZeppelin Contracts v5
 
 ### Install Dependencies
@@ -375,8 +375,7 @@ Whether a user is a payee collecting earned payments or a payer receiving a refu
 
 ## License
 
-This project is released under the **UNLICENSED** identifier. All rights reserved by the author. Contact for usage permissions.
-
+**MIT**
 ---
 
 *Built with Solidity · Secured with Pull-over-Push · Powered by OpenZeppelin*
