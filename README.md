@@ -1,6 +1,6 @@
 # Milestone-Based Escrow System
 
-te> A trustless, gas-safe escrow protocol built in Solidity — enabling secure, milestone-driven service payments with on-chain dispute resolution and pull-based fund withdrawal.
+> A trustless, gas-safe escrow protocol built in Solidity — enabling secure, milestone-driven service payments with on-chain dispute resolution and pull-based fund withdrawal.
 
 ---
 
