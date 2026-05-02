@@ -1,6 +1,6 @@
 # Milestone-Based Escrow System
 
-> A trustless, gas-safe escrow protocol built in Solidity — enabling secure, milestone-driven service payments with on-chain dispute resolution and pull-based fund withdrawal.
+te> A trustless, gas-safe escrow protocol built in Solidity — enabling secure, milestone-driven service payments with on-chain dispute resolution and pull-based fund withdrawal.
 
 ---
 
@@ -199,6 +199,8 @@ All indexed parameters support efficient off-chain filtering for dashboards, not
 
 ## Security Model
 
+> **Static Analysis**: This contract was analyzed with [Slither](https://github.com/crytic/slither). **Zero High, Medium, or Low severity issues were identified.** All findings are Informational. See [Known Limitations](#known-limitations) for a full breakdown.
+
 ### Pull-over-Push Payment Pattern
 This is the most significant security property of the contract. In a naive push model, every payment-releasing function makes a direct ETH transfer to an external address. This introduces two critical vulnerabilities:
 
@@ -240,9 +242,28 @@ The 20-milestone hard cap prevents a deal from being initialized with enough ent
 
 ### Known Limitations
 
-- **Owner Trust**: Dispute resolution depends on a trusted owner. In a production deployment, this role should be held by a multi-sig wallet (e.g., Gnosis Safe) or a DAO governance contract to remove single-point-of-failure risk.
-- **No Deadline Mechanism**: The contract has no time-based auto-release or auto-cancel. This is a deliberate simplification and a natural candidate for a future iteration.
-- **No Partial Cancellation**: Once a milestone is approved, it cannot be reversed. Disputes are the intended path for disagreements arising after work has begun.
+The following limitations were identified through a Slither static analysis audit. **No High, Medium, or Low severity issues were found.** All findings are informational in nature.
+
+**Owner Trust**
+Dispute resolution depends on a trusted contract owner. In a production deployment, this role should be assigned to a multi-sig wallet (e.g., Gnosis Safe) or a DAO governance contract to eliminate single-point-of-failure risk.
+
+**No Deadline Mechanism**
+The contract has no time-based auto-release or auto-cancel. If a payer becomes unresponsive, the payee's only recourse is to raise a dispute. A deadline-based fallback is a natural candidate for a future iteration.
+
+**No Partial Cancellation**
+Once a milestone is approved and credited, it cannot be reversed. Disputes are the intended escalation path for disagreements arising after work has begun.
+
+**Low-Level ETH Transfer in `withdraw()`** *(Slither: `low-level-calls`, Informational)*
+The `withdraw()` function uses a low-level `.call{value: amount}("")` to transfer ETH. This is the recommended approach in modern Solidity — `transfer()` and `send()` are deprecated due to their fixed 2300 gas stipend, which can fail for smart contract recipients. The low-level call, combined with the `nonReentrant` modifier and CEI ordering, is the correct and safe pattern here.
+
+**Inline Assembly in OpenZeppelin Dependencies** *(Slither: `assembly`, Informational)*
+Several functions within OpenZeppelin's `StorageSlot.sol` utility use inline assembly (`INLINE ASM`) for gas-efficient low-level storage access. These findings originate entirely from OpenZeppelin's own library code and are not present anywhere in the application contract. They are expected, intentional, and carry no risk to this contract.
+
+**Compiler Version Pragma** *(Slither: `solc-version`, Informational)*
+The `^0.8.20` pragma used by OpenZeppelin's dependency files is flagged as containing three known compiler bugs: `VerbatimInvalidDeduplication`, `FullInlinerNonExpressionSplitArgumentEvaluationOrder`, and `MissingSideEffectsOnSelectorAccess`. These bugs affect highly specific edge cases in the optimizer and inline assembly — none of which are exercised by this contract's logic. The risk is negligible in practice, but pinning to a specific patched compiler version (e.g., `0.8.24`) in a production deployment is advisable.
+
+**Parameter Naming Convention** *(Slither: `naming-convention`, Informational)*
+Several function parameters (e.g., `_dealId`, `_payee`, `_amount`) use an underscore-prefixed naming style, which Slither flags as not conforming strictly to Solidity's mixedCase convention. This is a widely used convention in Solidity development for distinguishing local parameters from storage variables, and does not affect security or correctness in any way.
 
 ---
 
@@ -354,7 +375,7 @@ Whether a user is a payee collecting earned payments or a payer receiving a refu
 
 ## License
 
-**MIT**
+This project is released under the **UNLICENSED** identifier. All rights reserved by the author. Contact for usage permissions.
 
 ---
 
